@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Мой Telegram Web App</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-text-color, #000000);
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+
+    h1 { margin-top: 10px; }
+
+    button {
+      padding: 10px 20px;
+      background-color: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-text-color, #ffffff);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 16px;
+    }
+
+    /* Небольшая адаптация под высоту WebApp */
+    .wrap {
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>Привет, <span id="username">Пользователь</span>!</h1>
+    <p>Это пример простого Telegram Web App.</p>
+    <button id="close-btn" type="button">Закрыть приложение</button>
+  </div>
+
+  <script>
+    // Telegram WebApp объект обычно уже доступен в окружении WebView
+    const tg = window.Telegram?.WebApp;
+
+    if (!tg) {
+      alert("Это страница не запущена внутри Telegram Web App.");
+      // Можно продолжить без Telegram, но будет меньше возможностей
+    } else {
+      // Сообщаем Telegram, что приложение готово
+      tg.ready();
+
+      // Включаем полноэкранный режим (если поддерживается)
+      tg.expand?.();
+
+      // Применяем тему (если Telegram предоставляет цвета)
+      tg.setBackgroundColor?.(tg.themeParams?.bg_color || "#ffffff");
+
+      // Получаем имя пользователя, если есть initDataUnsafe
+      const user = tg.initDataUnsafe?.user;
+      if (user?.first_name) {
+        document.getElementById("username").innerText = user.first_name;
+      }
+
+      // Закрытие
+      document.getElementById("close-btn").addEventListener("click", () => {
+        tg.close?.();
+        // fallback: если close недоступен
+        // location.href = "about:blank";
+      });
+
+      // Пример: можно реагировать на изменение темы
+      tg.onEvent?.("themeChanged", () => {
+        const params = tg.themeParams || {};
+        document.body.style.background = params.bg_color || "#ffffff";
+        document.body.style.color = params.text_color || "#000000";
+      });
+    }
+  </script>
+</body>
+</html>
