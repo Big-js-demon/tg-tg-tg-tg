@@ -1,223 +1,104 @@
 <!doctype html>
-<html lang="en">
-
+<html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  
-  <!-- Content Security Policy: защита от XSS и инъекций -->
-  <!-- Разрешаем только необходимые домены для минимизации утечки информации злоумышленникам -->
-  <!-- unsafe-inline для script-src необходим для Vite HMR в dev режиме -->
-  <!-- *.bravavless.ru разрешает все поддомены (api.bravavless.ru, miniapp.bravavless.ru и т.д.) -->
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' https://telegram.org;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    img-src 'self' data: https:;
-    font-src 'self' data: https://fonts.gstatic.com;
-    connect-src 'self' https://*.bravavless.ru https://bravavless.ru https://api.bot.bravavless.ru https://*.devtunnels.ms wss://localhost:* ws://localhost:* https://localhost:* http://localhost:*;
-    frame-ancestors 'none';
-    base-uri 'self';
-    form-action 'self';
-    upgrade-insecure-requests;
-  " />
-  
-  <!-- X-Frame-Options: защита от clickjacking -->
-  <meta http-equiv="X-Frame-Options" content="DENY" />
-  
-  <!-- X-Content-Type-Options: предотвращение MIME-sniffing -->
-  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  
-  <!-- Referrer Policy: минимизация утечки информации о домене -->
-  <meta name="referrer" content="strict-origin-when-cross-origin" />
-  
-  <!-- Google Fonts: Exo 2 для лого и Orbitron для заголовков -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  
-  <title>Brava VLESS</title>
-  <!-- Telegram WebApp SDK для haptic feedback и других функций -->
-  <!-- SRI: Subresource Integrity для защиты от компрометации CDN -->
-  <!-- Примечание: Telegram может обновлять скрипт, поэтому SRI может потребовать обновления -->
-  <script 
-    src="https://telegram.org/js/telegram-web-app.js" 
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  ></script>
-  <!-- Защита от DevTools - применяется до загрузки React и работает на всех страницах -->
-  <!--
-  <script>
-    (function() {
-      'use strict';
-      
-      // Блокировка правой кнопки мыши (на всех элементах)
-      function blockContextMenu(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        return false;
-      }
-
-      // Блокировка горячих клавиш для DevTools
-      function blockDevToolsKeys(e) {
-        // F12
-        if (e.keyCode === 123) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          return false;
-        }
-        // Ctrl+Shift+I (DevTools)
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          return false;
-        }
-        // Ctrl+Shift+J (Console)
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          return false;
-        }
-        // Ctrl+Shift+C (Element Inspector)
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          return false;
-        }
-        // Ctrl+Shift+K (Console альтернативный)
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 75) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          return false;
-        }
-        // Ctrl+Shift+E (Network)
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 69) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          return false;
-        }
-        // Ctrl+U (View Source)
-        if (e.ctrlKey && e.keyCode === 85) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          return false;
-        }
-        // Ctrl+S (Save Page)
-        if (e.ctrlKey && e.keyCode === 83) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          return false;
-        }
-      }
-
-      // Блокировка выделения текста
-      function blockSelection(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-
-      // Блокировка drag & drop
-      function blockDrag(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-
-      // Отключение выделения через CSS (применяется сразу и при загрузке DOM)
-      function disableTextSelection() {
-        if (document.body) {
-          document.body.style.userSelect = 'none';
-          document.body.style.webkitUserSelect = 'none';
-          document.body.style.mozUserSelect = 'none';
-          document.body.style.msUserSelect = 'none';
-          document.body.style.KhtmlUserSelect = 'none';
-          document.body.setAttribute('unselectable', 'on');
-          document.body.setAttribute('onselectstart', 'return false;');
-        }
-        if (document.documentElement) {
-          document.documentElement.style.userSelect = 'none';
-          document.documentElement.style.webkitUserSelect = 'none';
-          document.documentElement.style.mozUserSelect = 'none';
-          document.documentElement.style.msUserSelect = 'none';
-        }
-      }
-
-      // Применяем защиту сразу
-      disableTextSelection();
-
-      // Добавляем обработчики с максимальным приоритетом (capture phase)
-      document.addEventListener('contextmenu', blockContextMenu, { capture: true, passive: false });
-      document.addEventListener('keydown', blockDevToolsKeys, { capture: true, passive: false });
-      document.addEventListener('selectstart', blockSelection, { capture: true, passive: false });
-      document.addEventListener('dragstart', blockDrag, { capture: true, passive: false });
-      
-      // Также добавляем на window для большей надёжности
-      window.addEventListener('contextmenu', blockContextMenu, { capture: true, passive: false });
-      window.addEventListener('keydown', blockDevToolsKeys, { capture: true, passive: false });
-      
-      // Применяем CSS при загрузке DOM
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', disableTextSelection);
-      } else {
-        disableTextSelection();
-      }
-
-      // Также применяем при полной загрузке страницы
-      window.addEventListener('load', disableTextSelection);
-
-      // Дополнительная защита: перехватываем попытки открытия DevTools через консоль
-      // ТОЛЬКО на десктопе - на мобильных устройствах методы обнаружения дают ложные срабатывания
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                       (window.innerWidth <= 768 && window.innerHeight <= 1024);
-      
-      if (!isMobile) {
-        const devtools = {
-          open: false,
-          orientation: null
-        };
-        const threshold = 160;
-        setInterval(function() {
-          if (window.outerHeight - window.innerHeight > threshold || 
-              window.outerWidth - window.innerWidth > threshold) {
-            if (!devtools.open) {
-              devtools.open = true;
-              // Очищаем содержимое при обнаружении DevTools безопасным способом
-              while (document.body.firstChild) {
-                document.body.removeChild(document.body.firstChild);
-              }
-              document.body.style.background = 'linear-gradient(170deg,#020714_0%,#061226_35%,#0A1F3F_65%,#0D305C_100%)';
-              
-              // Создаем элемент безопасно без innerHTML
-              const warningDiv = document.createElement('div');
-              warningDiv.style.cssText = 'display:flex;align-items:center;justify-content:center;height:100vh;color:white;font-size:24px;text-align:center;padding:20px;';
-              warningDiv.textContent = 'Закройте DevTools для продолжения работы';
-              document.body.appendChild(warningDiv);
-            }
-          } else {
-            devtools.open = false;
-          }
-        }, 500);
-      }
-    })();
-  </script>
-  -->
-  <script type="module" crossorigin src="/assets/index-DeAhFe-6.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BgHcnHhI.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Telegram Mini App - localStorage</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 16px; }
+    pre { background:#f6f6f6; padding:12px; border-radius:8px; overflow:auto; }
+    button { padding: 10px 14px; cursor: pointer; margin-top: 10px; }
+  </style>
 </head>
-
 <body>
-  <div id="root"></div>
-</body>
+  <h3>Telegram Mini App (без бэка)</h3>
 
+  <div id="status">Проверка...</div>
+  <div id="user"></div>
+
+  <h4>initData (как есть)</h4>
+  <pre id="raw"></pre>
+
+  <button id="clear">Очистить localStorage</button>
+
+  <script>
+    const LS_KEY = "tg_initData";
+
+    function getTelegramInitData() {
+      return window.Telegram?.WebApp?.initData || "";
+    }
+
+    function parseInitData(initData) {
+      // initData: query_id=...&user=%7B...%7D&auth_date=...&hash=...
+      const params = new URLSearchParams(initData);
+      const userStr = params.get("user");
+      let user = null;
+
+      try {
+        user = userStr ? JSON.parse(userStr) : null;
+      } catch {
+        user = null;
+      }
+
+      return {
+        query_id: params.get("query_id"),
+        user,
+        auth_date: params.get("auth_date"),
+        hash: params.get("hash"),
+      };
+    }
+
+    async function init() {
+      const tg = window.Telegram?.WebApp;
+      if (tg?.ready) tg.ready();
+      if (tg?.expand) tg.expand();
+
+      const stored = localStorage.getItem(LS_KEY);
+
+      // Если открылись второй раз — можно показать из localStorage
+      if (stored) {
+        const parsed = parseInitData(stored);
+        document.getElementById("user").innerHTML = renderUser(parsed.user);
+        document.getElementById("raw").textContent = stored;
+        document.getElementById("status").textContent =
+          "Загружено из localStorage (без крипто-проверки).";
+      }
+
+      const initData = getTelegramInitData();
+      if (!initData) {
+        document.getElementById("status").textContent =
+          "initData не найден. Открыто не как Mini App или Telegram не передал данные.";
+        return;
+      }
+
+      // Обновим localStorage свежими данными
+      localStorage.setItem(LS_KEY, initData);
+
+      const parsed = parseInitData(initData);
+      document.getElementById("user").innerHTML = renderUser(parsed.user);
+      document.getElementById("raw").textContent = initData;
+      document.getElementById("status").textContent =
+        "initData получен из Telegram. Хэш НЕ проверен (без бэка).";
+    }
+
+    function renderUser(user) {
+      if (!user) return "<div>Пользователь: (не удалось распарсить)</div>";
+      const name = `${user.first_name || ""} ${user.last_name || ""}`.trim();
+      return `
+        <div><b>ID:</b> ${user.id}</div>
+        <div><b>Имя:</b> ${name || "-"}</div>
+        <div><b>Username:</b> @${user.username || "-"}</div>
+      `;
+    }
+
+    document.getElementById("clear").addEventListener("click", () => {
+      localStorage.removeItem(LS_KEY);
+      document.getElementById("user").innerHTML = "";
+      document.getElementById("raw").textContent = "";
+      document.getElementById("status").textContent = "localStorage очищен.";
+    });
+
+    init();
+  </script>
+</body>
 </html>
